@@ -1,14 +1,22 @@
 # Releases
 
-**Latest v2 release:** [v2.3.0](v2.3.0.md) — critical `_select` SQL-injection fix ([GHSA-qvx3-q8vx-9q3c](https://github.com/prest/prest/security/advisories/GHSA-qvx3-q8vx-9q3c)), multi-adapter architecture with Postgres/TimescaleDB auto-detect, and JWKS hardening ([#1002](https://github.com/prest/prest/pull/1002), [#999](https://github.com/prest/prest/pull/999)).
+**Latest v2 release:** [v2.4.0](v2.4.0.md) — opt-in OpenTelemetry instrumentation with a local SigNoz dev stack ([#1003](https://github.com/prest/prest/pull/1003)), pgvector nearest-neighbor ordering / distance filtering via `_korder` and `:vecdist` ([#1011](https://github.com/prest/prest/pull/1011)), and a pREST Studio dependency upgrade ([#1004](https://github.com/prest/prest/pull/1004)).
 
 For stable v1 releases, see [GitHub Releases](https://github.com/prest/prest/releases/latest).
 
 ## Unreleased (main)
 
-Merged after v2.3.0, not yet tagged: opt-in OpenTelemetry instrumentation with a local SigNoz dev stack ([#1003](https://github.com/prest/prest/pull/1003)), a Studio dependency upgrade ([#1004](https://github.com/prest/prest/pull/1004)), and pgvector nearest-neighbor ordering / distance filtering via `_korder` and `:vecdist` ([#1011](https://github.com/prest/prest/pull/1011)).
+Nothing merged after v2.4.0 yet. See [Changes since v2.4.0](main-since-v2.4.0.md).
 
-See [Changes since v2.3.0](main-since-v2.3.0.md).
+## v2.4.0 highlights
+
+| Area | Change |
+|------|--------|
+| Observability | Opt-in OpenTelemetry traces/metrics/logs, local SigNoz dev stack ([#1003](https://github.com/prest/prest/pull/1003)) |
+| Vector search | pgvector KNN ordering (`_korder`) and distance filtering (`:vecdist`) ([#1011](https://github.com/prest/prest/pull/1011)) |
+| pREST Studio | Dependency upgrade — auth-dialog and tool-invocation fixes ([#1004](https://github.com/prest/prest/pull/1004)) |
+
+See [v2.4.0 release notes](v2.4.0.md) and [Changes since v2.3.0](main-since-v2.3.0.md).
 
 ## v2.3.0 highlights
 

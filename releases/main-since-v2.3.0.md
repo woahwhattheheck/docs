@@ -1,12 +1,13 @@
 ---
 description: >-
-  Changes merged after v2.3.0 — OpenTelemetry instrumentation, pREST Studio
-  dependency bump, and pgvector nearest-neighbor / distance-filter support.
+  Changes since v2.3.0 included in v2.4.0 — OpenTelemetry instrumentation,
+  pREST Studio dependency bump, and pgvector nearest-neighbor / distance-filter
+  support.
 ---
 
-# Changes since v2.3.0 (unreleased)
+# Changes since v2.3.0 (in v2.4.0)
 
-**Not yet tagged.** The commits below are merged to `main` after [v2.3.0](v2.3.0.md) and are not in any published release yet. Compare: [v2.3.0...main](https://github.com/prest/prest/compare/v2.3.0...main).
+**Released as [v2.4.0](v2.4.0.md).** The commits below were merged after [v2.3.0](v2.3.0.md) and are included in the v2.4.0 release. Compare: [v2.3.0...v2.4.0](https://github.com/prest/prest/compare/v2.3.0...v2.4.0).
 
 | Commit | PR | Summary |
 |--------|-----|---------|
@@ -54,5 +55,6 @@ Malformed metrics, non-numeric vector elements, oversized vectors (>16000 dims, 
 
 ## Related
 
+- [v2.4.0 release notes](v2.4.0.md)
 - [v2.3.0 release notes](v2.3.0.md)
 - [Releases](README.md)

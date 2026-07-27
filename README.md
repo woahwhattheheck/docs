@@ -10,7 +10,7 @@ description: >-
 
 **PostgreSQL is the first native adapter.** Postgres-compatible engines can be certified on that adapter. MySQL, SQLite, and SQL Server are on the [roadmap](databases/roadmap.md).
 
-*Last updated: July 22, 2026*
+*Last updated: July 26, 2026*
 
 ---
 
@@ -22,6 +22,8 @@ description: >-
 | MCP over HTTP | Read-only `/_mcp` for AI agents and IDEs ([guide](get-started/mcp-over-http.md)) |
 | Auth & ACL | JWT/auth stack and table-level permissions |
 | Multi-database | Alias registry across clusters ([guide](get-started/multi-database.md)); Postgres/Timescale multi-adapter auto-detect (v2.3.0, [#999](https://github.com/prest/prest/pull/999)) |
+| Vector search | pgvector KNN ordering / distance filtering via `_korder` and `:vecdist` (v2.4.0, [#1011](https://github.com/prest/prest/pull/1011)) |
+| Observability | Opt-in OpenTelemetry traces/metrics/logs (v2.4.0, [#1003](https://github.com/prest/prest/pull/1003)) |
 | Custom SQL | Templated `/_QUERIES` scripts |
 | Plugins | Middleware and endpoint extensions |
 
@@ -43,13 +45,13 @@ Full matrix and labels: [Databases](databases/README.md). Phases: [Database road
 
 ## Latest release
 
-**[v2.3.0](releases/v2.3.0.md)** — critical `_select` SQL-injection fix ([GHSA-qvx3-q8vx-9q3c](https://github.com/prest/prest/security/advisories/GHSA-qvx3-q8vx-9q3c)), multi-adapter architecture with Postgres/TimescaleDB auto-detect, and JWKS hardening. Includes Studio and MCP from [v2.2.0](releases/v2.2.0.md) / [v2.1.0](releases/v2.1.0.md).
+**[v2.4.0](releases/v2.4.0.md)** — opt-in OpenTelemetry instrumentation with a local SigNoz dev stack, pgvector nearest-neighbor ordering / distance filtering (`_korder`, `:vecdist`), and a pREST Studio dependency upgrade. Includes the `_select` security fix and multi-adapter architecture from [v2.3.0](releases/v2.3.0.md).
 
-- Docker: `prest/prest:v2.3.0`
-- Go: `go install github.com/prest/prest/v2/cmd/prestd@v2.3.0`
+- Docker: `prest/prest:v2.4.0`
+- Go: `go install github.com/prest/prest/v2/cmd/prestd@v2.4.0`
 - Studio: [pREST Studio](get-started/prest-studio.md)
 
-**Upgrade from v2.2.0 promptly** for the security fix. See [Releases](releases/README.md) and [Upgrading to v2](get-started/upgrading-to-v2.md).
+See [Releases](releases/README.md) and [Upgrading to v2](get-started/upgrading-to-v2.md).
 
 ---
 

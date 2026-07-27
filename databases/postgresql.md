@@ -24,6 +24,7 @@ description: >-
 | Scripts (`/_QUERIES`) | supported |
 | MCP (`/_mcp`) | supported (v2.1.0+) |
 | ACL / permissions | supported |
+| pgvector KNN / distance filtering (`_korder`, `:vecdist`) | supported (v2.4.0+, requires `pgvector` extension) — see [Parameters](../api-reference/parameters.md#pgvector-knn-ordering-and-distance-filtering-v240) |
 
 ---
 

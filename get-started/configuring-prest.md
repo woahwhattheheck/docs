@@ -297,6 +297,35 @@ See the [Multi-database guide](multi-database.md) for URL routing, TOML examples
 
 Since **v2.3.0** ([#999](https://github.com/prest/prest/pull/999)), each alias can auto-select a **Postgres or Timescale** adapter (MySQL/SQLite still roadmap).
 
+### Observability (OpenTelemetry) (v2.4.0)
+
+Since **v2.4.0** ([#1003](https://github.com/prest/prest/pull/1003)), pREST supports **opt-in** OTLP/gRPC push telemetry — HTTP, Postgres, and MCP traces; `http.server.*` / `db.client.operation.duration` / `db.sql.connection.*` metrics; and a `slog` → OTel logs bridge that still writes to stdout. No new HTTP route is added — there is no `/metrics` scrape endpoint.
+
+```toml
+[otel]
+enabled = false
+service_name = "prestd"
+# endpoint = "otel-collector:4317"
+protocol = "grpc"
+sample_ratio = 1.0
+metrics_interval = "15s"
+insecure = false
+db_statement = false
+```
+
+| Key | Env override | Default | Purpose |
+|---|---|---|---|
+| `enabled` | `PREST_OTEL_ENABLED` | `false` | Master switch — zero overhead and no outbound connections when off |
+| `service_name` | `PREST_OTEL_SERVICE_NAME` | `prestd` | Resource `service.name` |
+| `endpoint` | `PREST_OTEL_ENDPOINT` | _(unset)_ | OTLP gRPC collector `host:port` |
+| `protocol` | `PREST_OTEL_PROTOCOL` | `grpc` | Only `grpc` for now |
+| `sample_ratio` | `PREST_OTEL_SAMPLE_RATIO` | `1.0` | Trace head sampling, clamped `0.0–1.0` |
+| `metrics_interval` | `PREST_OTEL_METRICS_INTERVAL` | `15s` | Metric export period |
+| `insecure` | `PREST_OTEL_INSECURE` | `false` | Disable TLS to collector (local/dev) |
+| `db_statement` | `PREST_OTEL_DB_STATEMENT` | `false` | Record SQL text on DB spans (trusted environments only) |
+
+If the exporter can't be built at startup, pREST logs a warning and keeps serving with telemetry disabled — setup fails closed. A self-contained SigNoz stack lives under `dev/signoz/` in the pREST repo (`make signoz-up` / `make signoz-down`) for local viewing. See [v2.4.0 release notes](../releases/v2.4.0.md).
+
 ### CORS support
 
 **Cross-Origin Resource Sharing**
@@ -320,5 +349,6 @@ For multi-database deployments, prefer `/_ready` over `/_health` as the readines
 - [pREST Studio](prest-studio.md)
 - [Custom Queries](../api-reference/custom-queries.md)
 - [Auth](../api-reference/auth.md)
+- [v2.4.0 release notes](../releases/v2.4.0.md)
 - [v2.2.0 release notes](../releases/v2.2.0.md)
 - [Acronyms](../prestd/acronyms.md) · [JWT](../prestd/acronyms.md#jwt) · [MCP](../prestd/acronyms.md#mcp)

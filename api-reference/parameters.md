@@ -60,6 +60,22 @@ Aggregates are limited to `SUM`, `AVG`, `MAX`, `MIN`, `STDDEV`, `VARIANCE`. Anyt
 
 For projections that need arbitrary SQL expressions, use a [custom query](custom-queries.md) instead.
 
+### pgvector KNN ordering and distance filtering (v2.4.0)
+
+Since **v2.4.0** ([#1011](https://github.com/prest/prest/pull/1011)), two query-parameter forms are available for `vector`-typed columns (requires the `pgvector` extension on the target database):
+
+| Parameter | Form | Example | Effect |
+|---|---|---|---|
+| `_korder` | `<column>:<metric>:<vector>` | `_korder=embedding:l2:[1,0,0]` | Orders by nearest-neighbor distance (KNN); composes with `_order` as an additional sort term |
+| `<column>:vecdist` | `<metric>:<comparison>:<vector>:<threshold>` | `embedding:vecdist=l2:lt:[1,0,0]:0.5` | Filters rows by distance threshold |
+
+Metrics are restricted to a fixed whitelist: `l2`/`euclidean`, `cosine`/`cos`, `ip`/`inner`/`dot`, `l1`/`manhattan`. `:vecdist` comparisons are restricted to `=`, `!=`, `<`, `<=`, `>`, `>=` (non-scalar comparisons like `like` are rejected). The column goes through identifier validation, the vector literal round-trips through `ParseFloat`/`FormatFloat`, and the threshold is passed as a bound parameter — malformed metrics, non-numeric vector elements, oversized vectors (>16000 dims, pgvector's own limit), and dimension mismatches all return `400` rather than reaching the database unsafely.
+
+```http
+GET /db/public/docs?_korder=embedding:cosine:[0.1,0.2,0.3]&_page_size=5
+GET /db/public/docs?embedding:vecdist=l2:lt:[0.1,0.2,0.3]:0.5
+```
+
 ### Operators Reference Guide
 
 The following operators are used for filtering data in queries. Each operator defines a specific matching condition that determines which records are included in the result set.

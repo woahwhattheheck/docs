@@ -8,7 +8,7 @@ description: >-
 
 **pREST** is a open-source software that generates HTTP APIs from your schema so teams ship data products without writing boilerplate CRUD services — instant REST and MCP APIs for SQL databases. **PostgreSQL is the first native adapter**; Postgres-compatible engines are documented under [Databases](../databases/README.md).
 
-*Last updated: July 22, 2026*
+*Last updated: July 26, 2026*
 
 ---
 
@@ -22,6 +22,8 @@ description: >-
 | pREST Studio | Embedded UI at `/_studio/` — catalog, REST, and MCP explorers (v2.2.0+) |
 | Auth & permissions | JWT/auth stack and table-level ACL |
 | Multi-database | Route by alias across clusters; Timescale adapter auto-detect (v2.3.0, [#999](https://github.com/prest/prest/pull/999)) |
+| Vector search | pgvector KNN ordering / distance filtering (v2.4.0, [#1011](https://github.com/prest/prest/pull/1011)) |
+| Observability | Opt-in OpenTelemetry traces/metrics/logs (v2.4.0, [#1003](https://github.com/prest/prest/pull/1003)) |
 | Custom SQL routes | Templated `/_QUERIES` for curated operations |
 | Plugins | Extend with middleware and custom endpoints |
 | Postgres-family reach | Native PG plus certified/compatible wire engines |
@@ -53,6 +55,12 @@ From v2.1.0, the same process exposes read-only MCP tools — list schemas/table
 ## pREST Studio
 
 From v2.2.0, open `/_studio/` for an embedded catalog / REST / MCP explorer UI (read-only). Guide: [pREST Studio](../get-started/prest-studio.md).
+
+---
+
+## Observability and vector search
+
+From v2.4.0, opt-in OpenTelemetry instrumentation (traces, metrics, and a `slog`→OTel log bridge) ships behind `otel.enabled` — see [Configuring pREST — Observability](../get-started/configuring-prest.md#observability-opentelemetry-v240). The same release adds pgvector-backed nearest-neighbor ordering (`_korder`) and distance filtering (`:vecdist`) — [Parameters](../api-reference/parameters.md#pgvector-knn-ordering-and-distance-filtering-v240).
 
 ---
 
