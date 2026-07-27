@@ -4,6 +4,12 @@
 
 For stable v1 releases, see [GitHub Releases](https://github.com/prest/prest/releases/latest).
 
+## Unreleased (main)
+
+Merged after v2.3.0, not yet tagged: opt-in OpenTelemetry instrumentation with a local SigNoz dev stack ([#1003](https://github.com/prest/prest/pull/1003)), a Studio dependency upgrade ([#1004](https://github.com/prest/prest/pull/1004)), and pgvector nearest-neighbor ordering / distance filtering via `_korder` and `:vecdist` ([#1011](https://github.com/prest/prest/pull/1011)).
+
+See [Changes since v2.3.0](main-since-v2.3.0.md).
+
 ## v2.3.0 highlights
 
 | Area | Change |
