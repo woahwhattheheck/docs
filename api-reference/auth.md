@@ -21,13 +21,48 @@ When `jwt.default = true` and debug mode is off, you should configure one of the
 
 | Setting | Environment variable | Purpose |
 |---------|---------------------|---------|
-| `jwt.key` | `PREST_JWT_KEY` | Shared secret for HS256 (and other HMAC algorithms) |
+| `jwt.key` | `PREST_JWT_KEY` | Shared secret for HMAC algorithms — minimum length applies, see [below](#hmac-key-requirements-v242) |
 | `jwt.jwks` | `PREST_JWT_JWKS` | JSON Web Key Set for asymmetric verification |
 | `jwt.wellknownurl` | `PREST_JWT_WELLKNOWNURL` | OpenID Connect well-known URL to fetch JWKS |
 
 **In v2+ ([#974](https://github.com/prest/prest/pull/974)):** if JWT is enabled but no verification material is configured, JWT middleware is **auto-disabled** with an error log — the server continues to start. When `auth.enabled = true` without `jwt.key`, auth is also auto-disabled.
 
 > **v2.0.0-rc6 tagged binary:** the rc6 release **refuses to start** in the same situations. See [v2.0.0-rc6](../releases/v2.0.0-rc6.md#jwt-fail-closed-startup-960).
+
+### HMAC key requirements (v2.4.2)
+
+Since **v2.4.2** ([#1017](https://github.com/prest/prest/pull/1017)), pREST validates `jwt.key` against the RFC 7518 minimum for the configured HMAC algorithm at config load. The underlying library (`go-jose/v4`) enforces these sizes itself; checking at startup surfaces the problem in logs instead of at request time.
+
+| `jwt.algo` | Minimum `jwt.key` length |
+|---|---|
+| `HS256` — also the default when `jwt.algo` is unset | **32 bytes** |
+| `HS384` | **48 bytes** |
+| `HS512` | **64 bytes** |
+| `RS*`, `ES*`, `PS*`, `EdDSA` | Not checked — `jwt.key` is not used as a MAC key |
+
+The check is on the byte length of the raw string, so a 32-character ASCII secret satisfies HS256. Measure yours with `printf '%s' "$PREST_JWT_KEY" | wc -c`.
+
+{% hint style="danger" %}
+**An undersized key fails open, not closed.** pREST starts normally, discards the key, and disables the features that need it. `POST /auth` is no longer registered (clients get **404**, not 401) and every route wrapped by the auth middleware **passes through unauthenticated**. With `jwt.default = true` and no JWKS, the JWT middleware is removed from the stack entirely.
+
+Rotate short secrets **before** upgrading, and check startup logs for:
+
+```
+level=ERROR msg="jwt.key too short for HMAC algorithm" algo=HS256 got=6 want=32
+level=ERROR msg="auth disabled: jwt.key is empty"
+```
+{% endhint %}
+
+A configured `jwt.jwks` or `jwt.wellknownurl` is unaffected — verification continues against the JWKS even when an undersized HMAC key is discarded.
+
+### Signature algorithm (`jwt.algo`, v2.4.2)
+
+`jwt.algo` was accepted but discarded in earlier v2 releases — tokens were parsed without restricting the permitted signature algorithm. Since **v2.4.2** it is passed to the parser as the single allowed algorithm, which structurally prevents algorithm-confusion attacks.
+
+- A token whose `alg` header does not match `jwt.algo` is rejected with **401** and `{"error": "failed JWT token parser"}`.
+- The value is matched **case-sensitively** against `EdDSA`, `HS256`, `HS384`, `HS512`, `RS256`, `RS384`, `RS512`, `ES256`, `ES384`, `ES512`, `PS256`, `PS384`, `PS512`. Anything else — including `hs256` in lowercase or an explicit `algo = ""` — makes every request return **HTTP 500** with `unsupported JWT signature algorithm`.
+
+Leave `jwt.algo` unset to get the `HS256` default.
 
 ### JWKS fetch hardening (v2.3.0)
 
@@ -77,6 +112,7 @@ curl -i -X POST http://127.0.0.1:3000/auth --user "<username>:<password>"
 ## Related
 
 - [Configuring pREST — JWT](../get-started/configuring-prest.md#jwt)
+- [v2.4.2 release notes](../releases/v2.4.2.md)
 - [MCP over HTTP](../get-started/mcp-over-http.md)
 - [Install pREST MCP Adapter](../ai/install-prest-mcp.md)
 - [Permissions](../get-started/permissions.md)

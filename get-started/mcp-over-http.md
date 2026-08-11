@@ -108,9 +108,15 @@ Use discovery to inspect available tools and their typed `inputSchema` before ca
 
 ## Tools reference
 
+{% hint style="info" %}
+Since **v2.4.1** ([#1016](https://github.com/prest/prest/pull/1016)), the three `prest.list_*` tools honour the `[expose]` settings. A denied listing is dropped from discovery and its `tools/call` returns `400` with `unauthorized listing`. See [Safety and limits](#safety-and-limits).
+{% endhint %}
+
 ### `prest.list_databases`
 
 List database aliases accessible to the current caller.
+
+**Requires:** `expose.databases` (v2.4.1+).
 
 **Arguments:** none.
 
@@ -130,6 +136,8 @@ In legacy single-host mode, returns databases from the catalog query.
 
 List readable schemas for a database alias.
 
+**Requires:** `expose.schemas` (v2.4.1+).
+
 **Arguments:**
 
 | Field | Required | Description |
@@ -143,6 +151,8 @@ List readable schemas for a database alias.
 ### `prest.list_tables`
 
 List readable tables for a database alias and optional schema.
+
+**Requires:** `expose.tables` (v2.4.1+).
 
 **Arguments:**
 
@@ -244,6 +254,10 @@ The generated `inputSchema` exposes:
 - `limit` (integer, 1–100) and `offset` (integer, minimum 0)
 
 In multi-database mode, tools are generated for every registered alias. Tables the caller cannot read are omitted from the tool list.
+
+{% hint style="warning" %}
+Since **v2.4.1**, if `[expose] enabled = true` and **any** of `databases` / `schemas` / `tables` is `false`, these per-table tools are **not generated at all** — their names embed database, schema, and table names and their descriptions embed column names, so enumerating them would leak the catalog that `[expose]` is hiding. Clients that relied on auto-discovered per-table tools should use the generic `prest.select_table` instead.
+{% endhint %}
 
 ---
 
@@ -388,6 +402,7 @@ When `pg.single = true` and a registry is active, only the default database alia
 | Row cap | Maximum **100** rows per select (`limit` defaults to 100) |
 | Identifier validation | Database, schema, table, column, and filter names are validated |
 | Unsupported tools | Return `400 Bad Request` with `unsupported tool` |
+| Catalog discovery (v2.4.1+) | `[expose]` applies to `/_mcp`, not just the REST listing routes — see below |
 | Custom queries | `/_QUERIES` scripts are not exposed through MCP |
 | Separate process | MCP runs in-process on `prestd`; optional [stdio adapter](../ai/install-prest-mcp.md) for clients that cannot call HTTP |
 
@@ -401,6 +416,28 @@ Calling a write tool (for example `prest.drop_table`) returns:
 }
 ```
 
+### Catalog discovery and `[expose]` (v2.4.1)
+
+Before **v2.4.1**, `/_mcp` never passed through the exposure middleware — a deployment that disabled the `/databases`, `/schemas`, or `/tables` REST routes still served its entire catalog to any MCP client. Since [#1016](https://github.com/prest/prest/pull/1016), the MCP handler consults the same settings.
+
+| Setting | Effect on `/_mcp` |
+|---|---|
+| `expose.enabled = false` (default) | Everything is listable — no change from v2.4.0 |
+| `expose.databases = false` (with `enabled = true`) | `prest.list_databases` dropped from discovery; `tools/call` returns `400` |
+| `expose.schemas = false` (with `enabled = true`) | `prest.list_schemas` dropped from discovery; `tools/call` returns `400` |
+| `expose.tables = false` (with `enabled = true`) | `prest.list_tables` dropped from discovery; `tools/call` returns `400` |
+| **Any** of the three denied | All `prest.select.{database}.{schema}.{table}` tools withheld |
+
+A denied listing returns a JSON-RPC error rather than a bare HTTP body:
+
+```json
+{"jsonrpc":"2.0","id":1,"error":{"code":400,"message":"unauthorized listing"}}
+```
+
+The REST routes return **401** for the same message — same rule, different surface.
+
+`[expose]` governs **discovery**; `[access]` governs **reads**. `prest.describe_table` and `prest.select_table` are always advertised, so a client that already knows a table name can still read it subject to [permissions](permissions.md). Configuration: [Configuring pREST — Expose Data](configuring-prest.md#expose-data).
+
 ---
 
 ## Troubleshooting
@@ -412,6 +449,8 @@ Calling a write tool (for example `prest.drop_table`) returns:
 | `400 unsupported method` | JSON-RPC method other than `initialize`, `tools/list`, or `tools/call` |
 | `400 unsupported column` | `columns`, `filters`, or `order_by` references a column not permitted or not on the table |
 | Empty tool list | ACL hides all tables, or catalog is unreachable for registered aliases |
+| `400 unauthorized listing` | The listing is denied by `[expose]` (v2.4.1+) — see [Catalog discovery and `[expose]`](#catalog-discovery-and-expose-v241) |
+| Per-table `prest.select.*` tools missing | `[expose]` is active with at least one listing denied (v2.4.1+); use `prest.select_table` |
 | Permission error on select | Caller lacks read access to the table or specific columns — see [Permissions](permissions.md) |
 | `invalid identifier in path` | Schema or table name failed identifier validation |
 

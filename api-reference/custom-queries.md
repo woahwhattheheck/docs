@@ -22,7 +22,11 @@ GET /_QUERIES/tenant-a/awesome_folder/example_of_powerful?field1=foo&field2=bar
 
 When the database prefix is omitted, the default database (`pg.database`) is used.
 
-> **Security (v2.0.0+):** template query parameters are sanitized ([#972](https://github.com/prest/prest/pull/972)). Pass well-formed values; unsafe inputs are rejected.
+{% hint style="warning" %}
+**Interpolated values are screened.** A value written into the SQL text — `'{{.field1}}'` above — becomes part of the statement, so pREST rejects values carrying quotes, `--`, `::`, or (for multi-word values) a SQL keyword. Since **v2.4.2** ([#1023](https://github.com/prest/prest/pull/1023)), a rejected value **fails the request with `400`** rather than being silently replaced by an empty string.
+
+For anything user-supplied, [bind the value](#binding-values-sqlval-sqllist-ident-v242) with `{{sqlVal "field1"}}` instead — bound values skip the screen entirely and can never be parsed as SQL.
+{% endhint %}
 
 **To activate filesystem scripts**, set a location in `prest.toml`:
 
@@ -117,6 +121,60 @@ makes available the headers `X-UserId` and `X-Application` in the script:
 {{index .header "X-Application"}}
 ```
 
+Header values go through the same screen as query parameters. A rejected header is blanked and logged at `WARN` rather than failing the request — an ordinary `User-Agent` contains `(` and `;`, which the character allow-list refuses, so erroring would reject nearly every browser request.
+
+The keys `header`, `_param`, and `_header` are reserved for template data. Query parameters using those names are ignored.
+
+#### Credential headers (v2.4.2)
+
+Since **v2.4.2** ([#1023](https://github.com/prest/prest/pull/1023)), credential-bearing headers are withheld from templates entirely and render as an empty string:
+
+`Authorization` · `Proxy-Authorization` · `Cookie` · `X-Api-Key` · `X-Auth-Token` · `X-Access-Token`
+
+They are withheld from the bound form too, so `{{sqlVal "header.Authorization"}}` is also empty — blanking them is about secrecy, and binding must not become a way around it. A bearer token is plain base64url text that passed the value screen untouched, so a template referencing it interpolated the caller's credential into SQL that was then logged.
+
+The request still succeeds; only the value is gone. A script that scoped rows by the caller's token now matches nothing — move that logic to [Permissions](../get-started/permissions.md), or pass a non-credential header such as `X-UserId`.
+
+### Binding values (`sqlVal`, `sqlList`, `ident`) (v2.4.2)
+
+Bind a value instead of interpolating it and the screen does not apply at all. A bound value travels to PostgreSQL out of band as a query parameter, where it can never be parsed as SQL:
+
+```sql
+-- interpolated: screened, and rejected for values like 'compra do mes'
+SELECT * FROM articles WHERE slug = '{{.slug}}'
+
+-- bound: the caller's value arrives verbatim, whatever it contains
+SELECT * FROM articles WHERE slug = {{sqlVal "slug"}}
+```
+
+| Helper | Use for | Renders |
+|--------|---------|---------|
+| `{{sqlVal "key"}}` | A single value | `$1` |
+| `{{sqlList "key"}}` | A repeated query parameter (`?tag=a&tag=b`) | `($1,$2)` |
+| `{{ident "key"}}` | A table or column name, which cannot be bound | `"public"."users"` |
+
+`sqlVal` and `sqlList` also reach headers, using a `header.` prefix:
+
+```sql
+SELECT * FROM tenants WHERE app = {{sqlVal "header.X-Application"}}
+```
+
+These helpers have existed since v2.0.0, but before **v2.4.2** they bound the *screened* value — so a rejected value bound as `""`. Since v2.4.2 ([#1023](https://github.com/prest/prest/pull/1023)) they resolve the raw value, which is what makes binding a complete alternative to the screen.
+
+{% hint style="info" %}
+Prefer binding for anything user-supplied — search phrases especially. A phrase containing a common word such as `do`, `as`, or `or` is exactly what the interpolation screen refuses.
+{% endhint %}
+
+**When a value is rejected**, the request fails with `400` and a message naming the parameter. The value itself is never echoed back:
+
+```json
+{
+  "error": "invalid value for parameter slug: it contains SQL syntax that cannot be interpolated safely; use the sqlVal template helper to bind free-form values"
+}
+```
+
+This applies to anything that renders the value into SQL text — `{{.slug}}`, `{{inFormat "slug"}}`, `{{unEscape .slug}}`. `sqlVal` and `sqlList` are exempt.
+
 ### Template functions
 
 #### isSet
@@ -179,6 +237,14 @@ _We recommend using the default pREST variables `_page` and `_page_size`:_
 
 ```sql
 {{limitOffset ._page ._page_size}}
+```
+
+#### unEscape
+
+URL-decodes a string (percent-encoding and `+`). The result is written into the SQL text, so it is subject to the [value screen](#binding-values-sqlval-sqllist-ident-v242) — bind with `sqlVal` when the value comes from the caller.
+
+```sql
+SELECT * FROM table WHERE path = '{{unEscape .path}}'
 ```
 
 ### Database-backed storage (v2.2.0+)
@@ -267,9 +333,24 @@ _consultations ready to use prest_
 
 * [Opps CMS](https://github.com/opps/prest-queries)
 
+## Troubleshooting
+
+| Response | Cause |
+|---|---|
+| `400` — `invalid value for parameter <name>: …` | An interpolated value was rejected by the screen. [Bind it](#binding-values-sqlval-sqllist-ident-v242) with `sqlVal`. |
+| `400` — `invalid identifier in path` | The database, folder, or script name contains characters outside the allow-list, including `.` — so `get_all.read` cannot be requested directly. |
+| `400` — `invalid script path: <folder>/<script>` | The resolved `.sql` file lies outside the queries directory. Since **v2.4.2** ([#1023](https://github.com/prest/prest/pull/1023)), `..` segments and symlinks escaping the tree are rejected both lexically and after symlink resolution. |
+| `400` — `could not parse script <folder>/<script>, check your prest logs` | A template parse or render error. Since **v2.4.2** the detail is logged rather than returned, so read the `prestd` logs. |
+| Empty value where a header was expected | The header is a [credential header](#credential-headers-v242) and is withheld from templates. |
+
+{% hint style="info" %}
+Since **v2.4.2**, SQL generated from custom query scripts is **not written to logs at any level** — the statement is caller-influenced. Use PostgreSQL's own statement logging when you need to see it. See [Configuring pREST — Logging](../get-started/configuring-prest.md#logging).
+{% endhint %}
+
 ## Related
 
 - [Configuring pREST](../get-started/configuring-prest.md)
 - [Multi-database](../get-started/multi-database.md)
-- [v2.2.0 release notes](../releases/v2.2.0.md)
+- [Permissions](../get-started/permissions.md)
+- [v2.4.2 release notes](../releases/v2.4.2.md) · [v2.2.0 release notes](../releases/v2.2.0.md)
 - [Acronyms](../prestd/acronyms.md) · [REST](../prestd/acronyms.md#rest) · [SQL](../prestd/acronyms.md#sql)

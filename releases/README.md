@@ -1,12 +1,33 @@
 # Releases
 
-**Latest v2 release:** [v2.4.0](v2.4.0.md) — opt-in OpenTelemetry instrumentation with a local SigNoz dev stack ([#1003](https://github.com/prest/prest/pull/1003)), pgvector nearest-neighbor ordering / distance filtering via `_korder` and `:vecdist` ([#1011](https://github.com/prest/prest/pull/1011)), and a pREST Studio dependency upgrade ([#1004](https://github.com/prest/prest/pull/1004)).
+**Latest v2 release:** [v2.4.2](v2.4.2.md) — RFC 7518 minimum key sizes for HMAC `jwt.key` ([#1017](https://github.com/prest/prest/pull/1017)), bound values for custom query scripts with credential headers withheld from templates, and SQL removed from logs ([#1023](https://github.com/prest/prest/pull/1023)).
 
 For stable v1 releases, see [GitHub Releases](https://github.com/prest/prest/releases/latest).
 
 ## Unreleased (main)
 
-Nothing merged after v2.4.0 yet. See [Changes since v2.4.0](main-since-v2.4.0.md).
+Nothing merged after v2.4.2 yet. See [Changes since v2.4.2](main-since-v2.4.2.md).
+
+## v2.4.2 highlights
+
+| Area | Change |
+|------|--------|
+| JWT | HMAC `jwt.key` minimums (32/48/64 bytes); short keys are discarded and **auth disables itself** ([#1017](https://github.com/prest/prest/pull/1017)) |
+| JWT | `jwt.algo` enforced as the sole permitted signature algorithm ([#1017](https://github.com/prest/prest/pull/1017)) |
+| Custom queries | Bind values with `sqlVal` / `sqlList` / `ident`; rejected interpolated values now fail with `400` ([#1023](https://github.com/prest/prest/pull/1023)) |
+| Custom queries | Credential headers withheld from templates; script path traversal rejected ([#1023](https://github.com/prest/prest/pull/1023)) |
+| Logging | Script SQL no longer logged; CRUD parameter values replaced by a count ([#1023](https://github.com/prest/prest/pull/1023)) |
+
+See [v2.4.2 release notes](v2.4.2.md). **Check `jwt.key` length before upgrading** — a short key leaves the API unauthenticated rather than refusing to start.
+
+## v2.4.1 highlights
+
+| Area | Change |
+|------|--------|
+| MCP | `/_mcp` honours `[expose]`, closing a catalog-discovery bypass ([#1016](https://github.com/prest/prest/pull/1016)) |
+| Custom queries | SQL-keyword screen on interpolated script values ([#1016](https://github.com/prest/prest/pull/1016)) — too broad, relaxed in [v2.4.2](v2.4.2.md) |
+
+See [v2.4.1 release notes](v2.4.1.md) and [Changes since v2.4.0](main-since-v2.4.0.md). Upgrade past v2.4.1 to v2.4.2.
 
 ## v2.4.0 highlights
 
@@ -17,6 +38,10 @@ Nothing merged after v2.4.0 yet. See [Changes since v2.4.0](main-since-v2.4.0.md
 | pREST Studio | Dependency upgrade — auth-dialog and tool-invocation fixes ([#1004](https://github.com/prest/prest/pull/1004)) |
 
 See [v2.4.0 release notes](v2.4.0.md) and [Changes since v2.3.0](main-since-v2.3.0.md).
+
+{% hint style="info" %}
+`_korder` / `:vecdist` and the `[otel]` section landed in v2.4.0 and are unchanged in v2.4.1 and v2.4.2.
+{% endhint %}
 
 ## v2.3.0 highlights
 

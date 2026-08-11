@@ -31,8 +31,8 @@ The _**prestd**_ configuration is via an _environment variable_ or _toml_ file. 
 | `PREST_CACHE_SUFIXFILE`              | .cache.prestd.db | suffix of the name of the file that is created                                                                                           |
 | `PREST_JWT_DEFAULT`                  | `false`          | v2+: enable default JWT middleware on all routes (except whitelist)                                                                        |
 | `PREST_STUDIO_ENABLED`               | `true`           | v2.2.0+: serve embedded pREST Studio at `/_studio/` (set `false` to disable; returns 404)                                                  |
-| `PREST_JWT_KEY`                      |                  |                                                                                                                                          |
-| `PREST_JWT_ALGO`                     | HS256            | (Deprecated) Not used                                                                                                                    |
+| `PREST_JWT_KEY`                      |                  | HMAC secret. v2.4.2+ requires ≥32 bytes for HS256, ≥48 for HS384, ≥64 for HS512                                                            |
+| `PREST_JWT_ALGO`                     | HS256            | v2.4.2+: the only signature algorithm accepted for verification (case-sensitive). Ignored before v2.4.2                                    |
 | `PREST_JWT_WELLKNOWNURL`             |                  | URL of .wellknown config of IDP used to fetch the JWKS used to verify token signature. Ignored if PREST_JWT_JWKS is set                  | 
 | `PREST_JWT_JWKS`                     |                  | JWKS used to verify token signature. If set, PREST_JWT_WELLKNOWNURL is ignored                                                           | 
 | `PREST_JWT_WHITELIST`                | `^\/auth$`       | Regex patterns for endpoints that skip JWT verification (v2)                                                                               |
@@ -117,8 +117,10 @@ JWT middleware is controlled by `jwt.default`. In **v2+**, the default is **`fal
 ```toml
 [jwt]
 default = true
-key = "your-secret"
+key = "a-secret-of-at-least-32-bytes!!!"
 ```
+
+**HMAC key length (v2.4.2+):** `jwt.key` must meet the RFC 7518 minimum for its algorithm — **32 bytes** for `HS256` (the default), **48** for `HS384`, **64** for `HS512` ([#1017](https://github.com/prest/prest/pull/1017)). A shorter key is **discarded at startup**; pREST keeps serving with `/auth` unregistered and the auth middleware passing requests through unauthenticated. Full detail and the log lines to grep for: [Auth — HMAC key requirements](../api-reference/auth.md#hmac-key-requirements-v242).
 
 **JWT configuration (v2+):** when `jwt.default = true` and no verification material is provided (`jwt.key`, `jwt.jwks`, or `jwt.wellknownurl`), pREST **auto-disables** the JWT middleware and logs an error — the server continues to start ([#974](https://github.com/prest/prest/pull/974), shipped in v2.0.0). When `auth.enabled = true` without `jwt.key`, the auth endpoint is also auto-disabled. This prevents authentication bypass via an empty HMAC key ([GHSA-fj7v-859r-2fm4](https://github.com/prest/prest/security/advisories/GHSA-fj7v-859r-2fm4)).
 
@@ -128,15 +130,20 @@ Debug mode bypasses JWT enforcement at runtime.
 
 See [Upgrading to v2](upgrading-to-v2.md) for migration guidance from v1.
 
-The algorithm used is the one contained in the header of the token. The token is then validated with the provided key or JWKS.
+Since **v2.4.2** ([#1017](https://github.com/prest/prest/pull/1017)), the token is validated against the algorithm configured in `jwt.algo` — not the one declared in the token's own header. A token signed with a different `alg` is rejected with `401`. Earlier v2 releases accepted the header's algorithm, which is what makes this a behavior change on upgrade.
 
-The supported signing algorithms are described in the [documentation of the JWK package](https://pkg.go.dev/github.com/lestrrat-go/jwx/jwk#section-readme).
-
-They include the following algorithms:
+Supported values, matched **case-sensitively**:
 
 * The [HMAC signing method](https://en.wikipedia.org/wiki/HMAC): `HS256`, `HS384`, `HS512`
-* The [RSA signing method](https://en.wikipedia.org/wiki/RSA_(cryptosystem)): `RS256`, `RS384`, `RS512`
+* The [RSA signing method](https://en.wikipedia.org/wiki/RSA_(cryptosystem)): `RS256`, `RS384`, `RS512`, and `PS256`, `PS384`, `PS512`
 * The [ECDSA signing method](https://en.wikipedia.org/wiki/Elliptic_Curve_Digital_Signature_Algorithm): `ES256`, `ES384`, `ES512`
+* `EdDSA`
+
+{% hint style="warning" %}
+A value outside that set — including `hs256` in lowercase or an explicit `algo = ""` — makes **every request return HTTP 500** with `unsupported JWT signature algorithm`. Leave `jwt.algo` unset to get the `HS256` default.
+{% endhint %}
+
+The provided `jwt.key` or JWKS is then used to verify the signature.
 
 Instead of the key, you could provide the URL of a .well-known OpenID configuration or the JWKS directly through `PREST_JWT_WELLKNOWNURL` or `PREST_JWT_JWKS` as environment variables or by using the TOML configuration file:
 
@@ -185,34 +192,50 @@ password = "password"
 
 ### Expose Data
 
-The expose data settings control access to listing endpoints:
+The expose data settings control access to **discovery**, as opposed to `[access]`, which controls whether data can be read or written. They cover the REST listing routes:
 
 * `/databases`
 * `/schemas`
 * `/tables`
 
+and, since **v2.4.1** ([#1016](https://github.com/prest/prest/pull/1016)), the catalog surface of the [MCP endpoint](mcp-over-http.md) — `/_mcp` previously bypassed these settings entirely, so a deployment that hid its catalog over REST still exposed it to any MCP client.
+
 By default, all listing endpoints are **enabled** (`expose.enabled = false` means listings are allowed).
 
-An example disabling all listings:
+{% hint style="warning" %}
+`enabled` is the master switch: the three per-listing flags **only take effect while `enabled = true`**. Setting `databases = false` on its own does nothing, because the default `enabled = false` allows every listing regardless.
+{% endhint %}
+
+To disable all listings:
 
 ```toml
 [expose]
 enabled = true
+databases = false
+schemas = false
+tables = false
 ```
 
 To disable just the database listing:
 
 ```toml
 [expose]
+enabled = true      # required
 databases = false
+schemas = true
+tables = true
 ```
 
 | Name        | Description                                                                        |
 | ----------- | ---------------------------------------------------------------------------------- |
-| `enabled`   | Set to `true` to **disable** all listing endpoints.                                |
-| `databases` | Set to `false` to **disable** _databases_ listing only.                          |
-| `schemas`   | Set to `false` to **disable** _schemas_ listing only.                              |
-| `tables`    | Set to `false` to **disable** _tables_ listing only.                               |
+| `enabled`   | Set to `true` to activate exposure control. While `false`, everything is listable.  |
+| `databases` | With `enabled = true`, set to `false` to **disable** _databases_ listing.           |
+| `schemas`   | With `enabled = true`, set to `false` to **disable** _schemas_ listing.             |
+| `tables`    | With `enabled = true`, set to `false` to **disable** _tables_ listing.              |
+
+Environment overrides: `PREST_EXPOSE_ENABLED`, `PREST_EXPOSE_DATABASES`, `PREST_EXPOSE_SCHEMAS`, `PREST_EXPOSE_TABLES`.
+
+**On MCP (v2.4.1+):** a denied listing removes the matching `prest.list_*` tool from discovery and makes `tools/call` return `400` with `unauthorized listing` (REST returns `401` for the same message). If **any** listing is denied, the per-table `prest.select.{database}.{schema}.{table}` tools are withheld too — their names and descriptions disclose table and column names. `prest.describe_table` and `prest.select_table` remain available, subject to [permissions](permissions.md). See [MCP over HTTP — Safety and limits](mcp-over-http.md#safety-and-limits).
 
 #### Default values for Exposure Settings
 
@@ -252,11 +275,19 @@ v2 uses Go's `slog` package for structured logging. JSON logs are emitted to std
 
 Database credentials are redacted in error logs ([#972](https://github.com/prest/prest/pull/972)).
 
+**Since v2.4.2** ([#1023](https://github.com/prest/prest/pull/1023)), logs no longer carry caller-influenced SQL or parameter values:
+
+| Path | What is logged |
+| ---- | -------------- |
+| Custom query scripts (`/_QUERIES`) | **No SQL at any level**, on both the read and write paths — the statement is composed from a template the caller feeds. Use PostgreSQL statement logging instead |
+| CRUD routes | The statement at `debug`, with parameter **values** replaced by a count: `msg="generated SQL" parameter_count=2` |
+| Script headers rejected by the value screen | A `warn` line naming the header only — never its value. Expect these on script endpoints hit by browsers |
+
 Set the `PREST_LOG_LEVEL` environment variable to control verbosity:
 
 | Level   | Description |
 | ------- | ----------- |
-| `debug` | SQL queries and detailed diagnostics |
+| `debug` | CRUD SQL and detailed diagnostics |
 | `info`  | General operational messages |
 | `warn`  | Warnings such as public mode, config fallbacks, or auto-disabled features |
 | `error` | Errors only |
@@ -288,6 +319,7 @@ Since **v2.0.0** ([#974](https://github.com/prest/prest/pull/974)), pREST does n
 | Cache storage path unavailable | Retry `./`; if that fails, disable cache |
 | Invalid database registry entry | Entry skipped with warning |
 | Unsafe JWT/auth config | JWT or auth auto-disabled with error log |
+| HMAC `jwt.key` below the RFC 7518 minimum (v2.4.2+) | Key discarded, then auth/JWT auto-disabled with error log — see [Auth](../api-reference/auth.md#hmac-key-requirements-v242) |
 
 ### Multi-database
 
@@ -349,6 +381,7 @@ For multi-database deployments, prefer `/_ready` over `/_health` as the readines
 - [pREST Studio](prest-studio.md)
 - [Custom Queries](../api-reference/custom-queries.md)
 - [Auth](../api-reference/auth.md)
+- [v2.4.2 release notes](../releases/v2.4.2.md)
+- [v2.4.1 release notes](../releases/v2.4.1.md)
 - [v2.4.0 release notes](../releases/v2.4.0.md)
-- [v2.2.0 release notes](../releases/v2.2.0.md)
 - [Acronyms](../prestd/acronyms.md) · [JWT](../prestd/acronyms.md#jwt) · [MCP](../prestd/acronyms.md#mcp)

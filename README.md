@@ -10,7 +10,7 @@ description: >-
 
 **PostgreSQL is the first native adapter.** Postgres-compatible engines can be certified on that adapter. MySQL, SQLite, and SQL Server are on the [roadmap](databases/roadmap.md).
 
-*Last updated: July 26, 2026*
+*Last updated: August 11, 2026*
 
 ---
 
@@ -20,11 +20,11 @@ description: >-
 |------------|--------|
 | Instant REST | Auto CRUD from schema: `GET/POST/PUT/PATCH/DELETE /{db}/{schema}/{table}` |
 | MCP over HTTP | Read-only `/_mcp` for AI agents and IDEs ([guide](get-started/mcp-over-http.md)) |
-| Auth & ACL | JWT/auth stack and table-level permissions |
+| Auth & ACL | JWT/auth stack and table-level permissions; HMAC key minimums enforced (v2.4.2, [#1017](https://github.com/prest/prest/pull/1017)) |
 | Multi-database | Alias registry across clusters ([guide](get-started/multi-database.md)); Postgres/Timescale multi-adapter auto-detect (v2.3.0, [#999](https://github.com/prest/prest/pull/999)) |
 | Vector search | pgvector KNN ordering / distance filtering via `_korder` and `:vecdist` (v2.4.0, [#1011](https://github.com/prest/prest/pull/1011)) |
 | Observability | Opt-in OpenTelemetry traces/metrics/logs (v2.4.0, [#1003](https://github.com/prest/prest/pull/1003)) |
-| Custom SQL | Templated `/_QUERIES` scripts |
+| Custom SQL | Templated `/_QUERIES` scripts with bound values via `sqlVal` ([guide](api-reference/custom-queries.md#binding-values-sqlval-sqllist-ident-v242)) |
 | Plugins | Middleware and endpoint extensions |
 
 ---
@@ -45,11 +45,15 @@ Full matrix and labels: [Databases](databases/README.md). Phases: [Database road
 
 ## Latest release
 
-**[v2.4.0](releases/v2.4.0.md)** — opt-in OpenTelemetry instrumentation with a local SigNoz dev stack, pgvector nearest-neighbor ordering / distance filtering (`_korder`, `:vecdist`), and a pREST Studio dependency upgrade. Includes the `_select` security fix and multi-adapter architecture from [v2.3.0](releases/v2.3.0.md).
+**[v2.4.2](releases/v2.4.2.md)** — RFC 7518 minimum key sizes for HMAC `jwt.key`, bound values for custom query scripts with credential headers withheld from templates, and SQL removed from logs. Includes the MCP `[expose]` enforcement from [v2.4.1](releases/v2.4.1.md) and the observability / pgvector work from [v2.4.0](releases/v2.4.0.md).
 
-- Docker: `prest/prest:v2.4.0`
-- Go: `go install github.com/prest/prest/v2/cmd/prestd@v2.4.0`
+- Docker: `prest/prest:v2.4.2`
+- Go: `go install github.com/prest/prest/v2/cmd/prestd@v2.4.2`
 - Studio: [pREST Studio](get-started/prest-studio.md)
+
+{% hint style="warning" %}
+Upgrading to v2.4.2? Check that `jwt.key` is at least 32 bytes (HS256) first — a shorter key is discarded at startup and auth disables itself. See [v2.4.2 — Upgrading](releases/v2.4.2.md#upgrading-from-v241).
+{% endhint %}
 
 See [Releases](releases/README.md) and [Upgrading to v2](get-started/upgrading-to-v2.md).
 

@@ -8,7 +8,7 @@ description: >-
 
 **pREST** is a open-source software that generates HTTP APIs from your schema so teams ship data products without writing boilerplate CRUD services — instant REST and MCP APIs for SQL databases. **PostgreSQL is the first native adapter**; Postgres-compatible engines are documented under [Databases](../databases/README.md).
 
-*Last updated: July 26, 2026*
+*Last updated: August 11, 2026*
 
 ---
 
@@ -20,11 +20,11 @@ description: >-
 | Full CRUD over HTTP | Familiar verbs map to SQL operations on the active dialect |
 | MCP over HTTP | AI agents discover and read data via `/_mcp` (v2.1.0+) |
 | pREST Studio | Embedded UI at `/_studio/` — catalog, REST, and MCP explorers (v2.2.0+) |
-| Auth & permissions | JWT/auth stack and table-level ACL |
+| Auth & permissions | JWT/auth stack and table-level ACL; HMAC key minimums enforced (v2.4.2, [#1017](https://github.com/prest/prest/pull/1017)) |
 | Multi-database | Route by alias across clusters; Timescale adapter auto-detect (v2.3.0, [#999](https://github.com/prest/prest/pull/999)) |
 | Vector search | pgvector KNN ordering / distance filtering (v2.4.0, [#1011](https://github.com/prest/prest/pull/1011)) |
 | Observability | Opt-in OpenTelemetry traces/metrics/logs (v2.4.0, [#1003](https://github.com/prest/prest/pull/1003)) |
-| Custom SQL routes | Templated `/_QUERIES` for curated operations |
+| Custom SQL routes | Templated `/_QUERIES` for curated operations, with bound values via `sqlVal` (v2.4.2, [#1023](https://github.com/prest/prest/pull/1023)) |
 | Plugins | Extend with middleware and custom endpoints |
 | Postgres-family reach | Native PG plus certified/compatible wire engines |
 
@@ -67,6 +67,8 @@ From v2.4.0, opt-in OpenTelemetry instrumentation (traces, metrics, and a `slog`
 ## Authentication and authorization
 
 Protect routes with JWT/auth configuration and restrict tables via `access.tables` / per-user rules — [Auth](../api-reference/auth.md), [Permissions](../get-started/permissions.md).
+
+From v2.4.2, HMAC `jwt.key` must meet the RFC 7518 minimum for its algorithm (32 bytes for HS256, 48 for HS384, 64 for HS512), and `jwt.algo` is enforced as the sole permitted signature algorithm — [Auth — HMAC key requirements](../api-reference/auth.md#hmac-key-requirements-v242). From v2.4.1, the `[expose]` listing settings also apply to the MCP endpoint, so `/_mcp` can no longer enumerate a catalog the REST routes hide — [Configuring pREST — Expose Data](../get-started/configuring-prest.md#expose-data).
 
 ---
 
