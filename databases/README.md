@@ -1,16 +1,16 @@
 ---
 description: >-
-  Which SQL databases pREST supports today — Native PostgreSQL, certified
-  Postgres-compatible engines, and the multi-database roadmap.
+  Which SQL databases pREST supports today — Native PostgreSQL and MySQL 8,
+  certified Postgres-compatible engines, and the remaining roadmap.
 ---
 
 # Databases
 
 This page lists which SQL databases pREST supports today and what is still on the roadmap — the canonical **support labels**.
 
-PostgreSQL is **native**. Postgres-compatible engines are **certified** or documented with caveats on that adapter. MySQL, SQLite, and SQL Server are **Roadmap** until dedicated adapters ship.
+PostgreSQL is **native**. MySQL 8.0.19+ is a separate **native** dialect from v2.5.0. Postgres-compatible engines are **certified** or documented with caveats on the PostgreSQL adapter. SQLite and SQL Server are **Roadmap**.
 
-*Last updated: July 18, 2026*
+*Last updated: October 7, 2026*
 
 ---
 
@@ -39,6 +39,16 @@ PostgreSQL is **native**. Postgres-compatible engines are **certified** or docum
 | TimescaleDB | Compatible with caveats | [timescaledb.md](timescaledb.md) |
 | Amazon Redshift | Compatible with caveats | [amazon-redshift.md](amazon-redshift.md) |
 
+---
+
+## MySQL (available)
+
+| Engine | Label | Page |
+|--------|-------|------|
+| MySQL 8.0.19+ | Native | [mysql.md](mysql.md) |
+
+MariaDB, TiDB, and Aurora MySQL stay on the [roadmap](roadmap.md). MCP is not on the MySQL adapter.
+
 Deep how-tos also live under [Integrations](../integrations/README.md).
 
 ---
@@ -47,7 +57,7 @@ Deep how-tos also live under [Integrations](../integrations/README.md).
 
 | Engine | Label | Page |
 |--------|-------|------|
-| MySQL / MariaDB / TiDB / Aurora MySQL | Roadmap (Phase 2) | [mysql.md](mysql.md) |
+| MariaDB / TiDB / Aurora MySQL | Roadmap (Phase 2) | [roadmap.md](roadmap.md) |
 | SQLite | Roadmap (Phase 3) | [sqlite.md](sqlite.md) |
 | SQL Server / Azure SQL | Roadmap (Phase 4) | [sql-server.md](sql-server.md) |
 | Oracle | Roadmap (Phase 5) | See [roadmap.md](roadmap.md) |
@@ -61,15 +71,15 @@ Full phases and architecture notes: [Database roadmap](roadmap.md).
 
 ### What databases does pREST support?
 
-Today: **PostgreSQL** (native) and engines that use the PostgreSQL wire protocol, with per-engine matrices. Other SQL families are planned — they are not installable yet.
+Today: **PostgreSQL** (native), **MySQL 8.0.19+** (native dialect, v2.5.0), and engines that use the PostgreSQL wire protocol, with per-engine matrices. SQLite and SQL Server are planned — they are not installable yet.
 
 ### Is Aurora / Neon / Supabase supported?
 
 Yes, as **Hosted PostgreSQL**. Use the same connection settings as PostgreSQL. See [Aurora PostgreSQL](aurora-postgresql.md).
 
-### When will MySQL or SQLite work?
+### When will MariaDB or SQLite work?
 
-They are Phase 2 and Phase 3 on the [roadmap](roadmap.md). Do not expect a MySQL or SQLite connection string to work with current releases.
+MariaDB, TiDB, and Aurora MySQL stay on Phase 2 of the [roadmap](roadmap.md). SQLite is Phase 3. MySQL 8 itself ships in [v2.5.0](../releases/v2.5.0.md) — see [MySQL](mysql.md).
 
 ---
 

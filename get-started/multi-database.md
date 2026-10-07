@@ -9,7 +9,7 @@ description: >-
 Route CRUD, catalog, scripts, and MCP tools across **one or more** SQL databases from a single pREST process. The first URL path segment selects the database (legacy name or registered **alias**).
 
 {% hint style="info" %}
-**Multi-adapter (Postgres + Timescale auto-detect)** shipped in [**v2.3.0**](../releases/v2.3.0.md) ([#999](https://github.com/prest/prest/pull/999)). Registry multi-cluster on the **PostgreSQL** adapter shipped earlier in [v2.0.0](../releases/v2.0.0.md). MySQL / SQLite adapters are **roadmap**, not installable.
+**Multi-adapter (Postgres + Timescale auto-detect)** shipped in [**v2.3.0**](../releases/v2.3.0.md) ([#999](https://github.com/prest/prest/pull/999)). Registry multi-cluster on the **PostgreSQL** adapter shipped earlier in [v2.0.0](../releases/v2.0.0.md). A **MySQL 8** dialect (`engine = "mysql"`) shipped in [v2.5.0](../releases/v2.5.0.md). SQLite remains **roadmap**.
 {% endhint %}
 
 | Mode | When | `{database}` in URL | Connection target |

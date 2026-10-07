@@ -1,14 +1,14 @@
 ---
 description: >-
-  pREST multi-database roadmap — PostgreSQL family first, then MySQL, SQLite,
-  SQL Server; analytical databases on a separate read-only track.
+  pREST multi-database roadmap — MySQL 8 shipped in v2.5.0; MariaDB, SQLite,
+  and SQL Server are still planned.
 ---
 
 # Database roadmap
 
-This page describes **planned** SQL adapters for pREST. Nothing here is installable until a release ships it. PostgreSQL is native today — see [Databases](README.md).
+This page describes **planned** SQL adapters for pREST. Items still marked Roadmap are not installable. PostgreSQL is native. MySQL 8.0.19+ shipped in [v2.5.0](../releases/v2.5.0.md) — see [Databases](README.md).
 
-*Last updated: July 22, 2026*
+*Last updated: October 7, 2026*
 
 ---
 
@@ -36,8 +36,9 @@ PostgreSQL family — native today
 └── Aurora PostgreSQL (certify)
 
 MySQL family — Phase 2
-├── MySQL, MariaDB (dialect profiles)
-├── TiDB, Aurora MySQL (certify after MySQL adapter)
+├── MySQL 8 — shipped in v2.5.0
+├── MariaDB (dialect profile, not shipped)
+└── TiDB, Aurora MySQL (certify after MariaDB profile)
 
 Embedded family — Phase 3
 └── SQLite
@@ -58,7 +59,7 @@ Later / separate
 | Phase | Focus | Status |
 |-------|--------|--------|
 | **1** | Certify CockroachDB, YugabyteDB, Aurora PostgreSQL; Timescale E2E ([v2.2.0](../releases/v2.2.0.md) / [#988](https://github.com/prest/prest/pull/988)); Timescale adapter + multi-adapter routing ([v2.3.0](../releases/v2.3.0.md) / [#999](https://github.com/prest/prest/pull/999)) | **In progress** |
-| **2** | MySQL/MariaDB native dialect; certify TiDB + Aurora MySQL | Roadmap |
+| **2** | MySQL 8 dialect adapter ([v2.5.0](../releases/v2.5.0.md) / [#1048](https://github.com/prest/prest/pull/1048)); MariaDB profile and TiDB + Aurora MySQL still planned | **Partial** — MySQL 8 shipped |
 | **3** | SQLite native — one file → REST/MCP | Roadmap |
 | **4** | SQL Server + Azure SQL | Roadmap |
 | **5** | Oracle vs analytical read-only track | Undecided |

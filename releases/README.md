@@ -1,12 +1,23 @@
 # Releases
 
-**Latest v2 release:** [v2.4.2](v2.4.2.md) — RFC 7518 minimum key sizes for HMAC `jwt.key` ([#1017](https://github.com/prest/prest/pull/1017)), bound values for custom query scripts with credential headers withheld from templates, and SQL removed from logs ([#1023](https://github.com/prest/prest/pull/1023)).
+**Latest v2 release:** [v2.5.0](v2.5.0.md) — MySQL 8 adapter ([#1048](https://github.com/prest/prest/pull/1048)), JOIN access control ([#1032](https://github.com/prest/prest/pull/1032), [#1033](https://github.com/prest/prest/pull/1033)), middleware plugin builds ([#1039](https://github.com/prest/prest/pull/1039)), and dependency bumps ([#1055](https://github.com/prest/prest/pull/1055)).
 
 For stable v1 releases, see [GitHub Releases](https://github.com/prest/prest/releases/latest).
 
 ## Unreleased (main)
 
-Nothing merged after v2.4.2 yet. See [Changes since v2.4.2](main-since-v2.4.2.md).
+Nothing merged after v2.5.0 yet. See [Changes since v2.5.0](main-since-v2.5.0.md).
+
+## v2.5.0 highlights
+
+| Area | Change |
+|------|--------|
+| MySQL | Native dialect adapter for MySQL 8.0.19+ when `engine = "mysql"` ([#1048](https://github.com/prest/prest/pull/1048)) |
+| JOIN ACL | Restricted joins return only permitted columns; bad joins are rejected ([#1032](https://github.com/prest/prest/pull/1032), [#1033](https://github.com/prest/prest/pull/1033)) |
+| Plugins | Middleware `.so` builds share the server module; missing plugins no-op ([#1039](https://github.com/prest/prest/pull/1039)) |
+| Dependencies | OpenTelemetry 1.47, Studio table library 8 → 9 ([#1055](https://github.com/prest/prest/pull/1055)) |
+
+See [v2.5.0 release notes](v2.5.0.md) and [MySQL](../databases/mysql.md). MariaDB is not supported. MCP stays on the PostgreSQL family.
 
 ## v2.4.2 highlights
 

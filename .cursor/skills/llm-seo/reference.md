@@ -20,9 +20,10 @@ PostgreSQL family — native today
 ├── TimescaleDB (compatible / extension)
 └── Amazon Redshift (compatible with caveats)
 
-MySQL family — Phase 2 (Roadmap)
-├── MySQL, MariaDB
-├── TiDB, Aurora MySQL
+MySQL family — Phase 2
+├── MySQL 8.0.19+ (Native, v2.5.0) — no MCP on this adapter
+├── MariaDB (Roadmap)
+└── TiDB, Aurora MySQL (Roadmap)
 
 Embedded — Phase 3 (Roadmap)
 └── SQLite
@@ -41,7 +42,7 @@ Later
 | Phase | Focus |
 |-------|--------|
 | 1 (now) | Certify CockroachDB, YugabyteDB, Aurora PostgreSQL; document TimescaleDB/Redshift caveats |
-| 2 | MySQL/MariaDB native dialect; certify TiDB + Aurora MySQL |
+| 2 | MySQL 8 shipped in v2.5.0; MariaDB profile and TiDB + Aurora MySQL still planned |
 | 3 | SQLite native |
 | 4 | SQL Server + Azure SQL |
 | 5 | Oracle vs analytical read-only based on demand |

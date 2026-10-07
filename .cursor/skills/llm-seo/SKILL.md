@@ -100,7 +100,7 @@ Roadmap stubs (`databases/mysql.md`, `databases/sqlite.md`, `databases/sql-serve
 | Avoid | Use |
 |-------|-----|
 | "Best" / "#1" / "only" | Specific: instant REST + MCP, PostgreSQL-first |
-| MySQL/SQLite/SQL Server as shipped | **Roadmap** + link roadmap page |
+| MariaDB / SQLite / SQL Server as shipped | **Roadmap** + link roadmap page. MySQL 8.0.19+ is native from v2.5.0 |
 | Competitor trademarks | Categories: hand-written APIs, BaaS, Postgres-native API servers |
 | Thin SEO clones | Original matrix + limitations per engine |
 | Gateway appositive leads | Job-first leads ([write-docs voice](../write-docs/voice.md)) |

@@ -8,9 +8,9 @@ description: >-
 
 **pREST** is open-source software that gives you instant [REST (Representational State Transfer)](api-reference/README.md) and [Model Context Protocol (MCP)](get-started/mcp-over-http.md) APIs for SQL databases. Point it at a database and get production-ready HTTP APIs — CRUD, custom SQL routes, auth, ACL, and (from v2.1.0) a read-only MCP endpoint — without hand-writing a backend.
 
-**PostgreSQL is the first native adapter.** Postgres-compatible engines can be certified on that adapter. MySQL, SQLite, and SQL Server are on the [roadmap](databases/roadmap.md).
+**PostgreSQL is the first native adapter.** MySQL 8.0.19+ is a separate native dialect from [v2.5.0](releases/v2.5.0.md). Postgres-compatible engines can be certified on the PostgreSQL adapter. SQLite and SQL Server are on the [roadmap](databases/roadmap.md).
 
-*Last updated: August 11, 2026*
+*Last updated: October 7, 2026*
 
 ---
 
@@ -33,11 +33,11 @@ description: >-
 
 | Status | Engines |
 |--------|---------|
-| **Native** | [PostgreSQL](databases/postgresql.md) |
+| **Native** | [PostgreSQL](databases/postgresql.md), [MySQL 8.0.19+](databases/mysql.md) |
 | **Hosted PostgreSQL** | [Aurora PostgreSQL](databases/aurora-postgresql.md), Neon, Supabase, AlloyDB |
 | **Certified / certifying** | [CockroachDB](databases/cockroachdb.md), [YugabyteDB](databases/yugabytedb.md) |
 | **Compatible with caveats** | [TimescaleDB](databases/timescaledb.md), [Amazon Redshift](databases/amazon-redshift.md) |
-| **Roadmap** | [MySQL](databases/mysql.md), [SQLite](databases/sqlite.md), [SQL Server](databases/sql-server.md) |
+| **Roadmap** | MariaDB, TiDB, Aurora MySQL, [SQLite](databases/sqlite.md), [SQL Server](databases/sql-server.md) |
 
 Full matrix and labels: [Databases](databases/README.md). Phases: [Database roadmap](databases/roadmap.md).
 
@@ -45,14 +45,14 @@ Full matrix and labels: [Databases](databases/README.md). Phases: [Database road
 
 ## Latest release
 
-**[v2.4.2](releases/v2.4.2.md)** — RFC 7518 minimum key sizes for HMAC `jwt.key`, bound values for custom query scripts with credential headers withheld from templates, and SQL removed from logs. Includes the MCP `[expose]` enforcement from [v2.4.1](releases/v2.4.1.md) and the observability / pgvector work from [v2.4.0](releases/v2.4.0.md).
+**[v2.5.0](releases/v2.5.0.md)** — MySQL 8 adapter (`engine = "mysql"`), JOIN columns that follow table access control, and middleware plugin builds. Includes the hardening from [v2.4.2](releases/v2.4.2.md).
 
-- Docker: `prest/prest:v2.4.2`
-- Go: `go install github.com/prest/prest/v2/cmd/prestd@v2.4.2`
+- Docker: `prest/prest:v2.5.0`
+- Go: `go install github.com/prest/prest/v2/cmd/prestd@v2.5.0`
 - Studio: [pREST Studio](get-started/prest-studio.md)
 
 {% hint style="warning" %}
-Upgrading to v2.4.2? Check that `jwt.key` is at least 32 bytes (HS256) first — a shorter key is discarded at startup and auth disables itself. See [v2.4.2 — Upgrading](releases/v2.4.2.md#upgrading-from-v241).
+Skipping v2.4.2 on the way to v2.5.0? Check that `jwt.key` is at least 32 bytes (HS256) first — a shorter key is discarded at startup and auth disables itself. See [v2.4.2 — Upgrading](releases/v2.4.2.md#upgrading-from-v241).
 {% endhint %}
 
 See [Releases](releases/README.md) and [Upgrading to v2](get-started/upgrading-to-v2.md).

@@ -25,7 +25,7 @@ description: >-
 | MCP (`/_mcp`) | supported (v2.1.0+) |
 | ACL / permissions | supported |
 
-Same matrix as [PostgreSQL](postgresql.md). Aurora MySQL is **not** supported until the MySQL adapter ships — see [MySQL roadmap](mysql.md).
+Same matrix as [PostgreSQL](postgresql.md). Aurora MySQL is **not** the MySQL 8 adapter — see the [roadmap](roadmap.md).
 
 ---
 

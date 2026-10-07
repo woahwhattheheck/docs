@@ -4,7 +4,7 @@ description: Bring your own middlewares to pREST
 
 # Middleware Plugin
 
-With prestd's middleware plugin system it is possible to create new middlewares to process before reaching the http handler (endpoint).
+With prestd's middleware plugin system it is possible to create new middlewares to process before reaching the http handler (endpoint). From **v2.5.0** ([#1039](https://github.com/prest/prest/pull/1039)), plugin builds use the server's Go module (including vendor in the Docker image), and a missing plugin falls back to no-op middleware.
 
 ### Naming patterns
 

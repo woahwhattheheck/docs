@@ -74,10 +74,10 @@ From v2.4.2, HMAC `jwt.key` must meet the RFC 7518 minimum for its algorithm (32
 
 ## Multi-database and SQL platform direction
 
-- **Today:** PostgreSQL native adapter; Timescale wire + E2E; hosted PG and PG-wire engines per [Databases](../databases/README.md). Multi-adapter routing (Postgres + Timescale) shipped in v2.3.0 ([#999](https://github.com/prest/prest/pull/999)) — see [Multi-database](../get-started/multi-database.md).  
-- **Next:** MySQL family, SQLite, SQL Server — [roadmap](../databases/roadmap.md).  
+- **Today:** PostgreSQL native adapter; MySQL 8.0.19+ native dialect (v2.5.0); Timescale wire + E2E; hosted PG and PG-wire engines per [Databases](../databases/README.md). Multi-adapter routing (Postgres + Timescale) shipped in v2.3.0 ([#999](https://github.com/prest/prest/pull/999)) — see [Multi-database](../get-started/multi-database.md).  
+- **Next:** MariaDB, SQLite, SQL Server — [roadmap](../databases/roadmap.md).  
 
-pREST is positioned as a **multi-database** API platform; adapters beyond PostgreSQL are explicit roadmap work, not silent claims.
+pREST is positioned as a **multi-database** API platform. PostgreSQL and MySQL 8 are native dialects; further adapters are explicit roadmap work, not silent claims.
 
 ---
 

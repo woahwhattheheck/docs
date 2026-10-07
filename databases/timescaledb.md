@@ -13,7 +13,7 @@ description: >-
 {% hint style="info" %}
 **v2.2.0+:** E2E coverage on the native PostgreSQL adapter ([#988](https://github.com/prest/prest/pull/988)). See [v2.2.0](../releases/v2.2.0.md).
 
-**v2.3.0 ([#999](https://github.com/prest/prest/pull/999)):** pREST **auto-detects** Timescale (extension check) and selects a Timescale adapter with `_time_bucket` and system-schema filtering. Still not a separate dialect family — wire-compatible with PostgreSQL. MySQL/SQLite multi-adapter is roadmap. See [v2.3.0](../releases/v2.3.0.md).
+**v2.3.0 ([#999](https://github.com/prest/prest/pull/999)):** pREST **auto-detects** Timescale (extension check) and selects a Timescale adapter with `_time_bucket` and system-schema filtering. Still not a separate dialect family — wire-compatible with PostgreSQL. MySQL 8 is a separate adapter from [v2.5.0](../releases/v2.5.0.md). SQLite remains roadmap. See [v2.3.0](../releases/v2.3.0.md).
 {% endhint %}
 
 Full Compose example: [Integrations — TimescaleDB](../integrations/timescaledb.md). Prefer `timescale/timescaledb:latest-pg18` and `CREATE EXTENSION IF NOT EXISTS timescaledb`.
